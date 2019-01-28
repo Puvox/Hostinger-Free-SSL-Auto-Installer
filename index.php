@@ -148,7 +148,7 @@ if ( !empty($_GET['generate']))
 	.scan-site { display:flex; flex-direction: column;  justify-content: center; align-items: center; }
 	#page .heading{text-align:center;}
 	/* -------------------- upload form area ------------------- */
-	.file-upload {  background-color: #ffffff;  width: 600px;  margin: 0 auto;  padding: 20px;}
+	.file-upload {  background-color: #ffffff;  width: 70%;  margin: 0 auto;  padding: 20px;}
 	.file-upload-btn {  width: 100%;  margin: 0;  color: #fff;  background: #1FB264;  border: none;  padding: 10px;  border-radius: 4px;  border-bottom: 4px solid #15824B;  transition: all .2s ease;  outline: none;  text-transform: uppercase;  font-weight: 700;}
 	.file-upload-btn:hover {  background: #1AA059;  color: #ffffff;  transition: all .2s ease;  cursor: pointer;}
 	.file-upload-btn:active {  border: 0;  transition: all .2s ease;}
