@@ -2,6 +2,16 @@
 header("Cache-Control: max-age=0, must-revalidate");
 //ini_set('session.cache_limiter','public');
 session_cache_limiter(true);
+// force ssl	
+function redirect_to_https(){
+	if(empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == "off"){
+		$redirect = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header('HTTP/1.1 301 Moved Permanently');
+		header('Location: ' . $redirect);
+		exit();
+	}
+}
+redirect_to_https();
 
 
 function cron_exec($server, $port, $user, $key_or_pass )
@@ -54,7 +64,7 @@ if(!empty($_FILES) && !empty($_FILES['fileToUpload']) )
 	session_write_close();
 
 	echo '<div class="all">';
-	echo 'Click desired domain to generate SSL for it (and wait about 1-2 mins): <br/>';
+	echo 'Click desired domain to generate SSL for it: <br/>';
 
 	foreach($array['domains'] as $e){
 		$domain_data = explode("|",$e);
@@ -97,7 +107,7 @@ if ( !empty($_GET['generate']))
 		// removed  from in front of ".... php composer.phar " , because hosting is blocking that domain. So, we have to manually include the "composer.phar"
 		//   php -r "copy(\'https://itask.software/tools2/composer-installer.txt\', \'composer-setup.php\');" && php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');"  && 
 		$www		= substr_count($domain , '.') >1 ? '' : ':www.'.$domain ;
-		$www_root	= substr_count($domain , '.') >1 ? '' : ':../public_html';
+		$www_root	= substr_count($domain , '.') >1 ? '' : '../public_html';
 		
 		$extras 	='';
 		$extras_root='';
@@ -110,16 +120,15 @@ if ( !empty($_GET['generate']))
 		
 		$domain_root = '../public_html/';
 
+		$ssh= cron_exec($ip, $port, $username, $ssh_key);
+
 		$command =  
 		'site='.$domain.';    sites_all='. $domain . $www . $extras .';     myemail="'.$user_mail.'";              TargetFolder=acme-client;     ( [ -d "$TargetFolder" ] || git clone https://github.com/kelunik/acme-client )  &&    cd $TargetFolder     &&    ( [ -f "composer-setup.php" ]    ||    php -r "copy(\'https://itask.software/tools/hostinger-ssl-autoinstaller/composer/installer\', \'composer-setup.php\');" )        &&       ( [ -f "composer.phar" ]  || ( php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');" ) )   &&   ( [ -d "vendor" ] ||  php composer.phar install --no-dev )      &&   php bin/acme setup --server letsencrypt --email $myemail           &&   php bin/acme issue --domains $sites_all --path '.$domain_root . $www_root . $extras_root.' --server letsencrypt      &&    php -r "mail(\''.$user_mail.'\', \'SSL generated for : '.$domain.'\',  file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/cert.pem\') .PHP_EOL.PHP_EOL . file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/key.pem\') );"';
 
-
-		$ssh= cron_exec($ip, $port, $username, $ssh_key);
 		$res= $ssh->exec($command);
-
 		echo  $res  ; 
 		if (stripos($res, 'Successfully issued') !==false )  {
-			echo "<br/><br/><h3>Files were successfully issued, check your mail.</h3>";
+			echo "<br/><br/>Files were successfully issued, check your mail.";
 		}
 		echo '<br/>';
 	}
@@ -175,7 +184,7 @@ if ( !empty($_GET['generate']))
 		<h1> Setup <b>HTTPS</b> for your site with <code>Let's encrypt</code> free SLL</h1>
 		
 		<div class="text-center text-italic">
-			<i>(You can fork on<a href="https://github.com/Puvox/free-SSL-generator-hostinger" target="_blank"> GitHub  <img src="https://assets-cdn.github.com/images/icons/emoji/octocat.png" height="30" /></a> and setup on your site)</i>
+			(Fork on<a href="https://github.com/Puvox/free-SSL-generator-hostinger" target="_blank"> GitHub  <img src="https://assets-cdn.github.com/images/icons/emoji/octocat.png" height="30" /></a> and setup on your site)
 		</div>
 
 	</div>
@@ -188,7 +197,6 @@ if ( !empty($_GET['generate']))
 			<li>Enter your hostinger account and go to <b>SSH</b> page for your target website(s) and enable "SSH ACCESS" for each of them.</li>
 			<li>Fill this <a href="example_data" download>example file</a> with your actual credentials, and upload that file.</li>
 			<li>You will get generated SSL certificates on your email (or spambox), then enter them in Hostinger SSL page.</li>
-			<li>After 3 month, Let's encrypt will remind you to renew the certificates, and you should repeat the steps once in every 3 months.</li>
 		</ul>
 	</div>
 
