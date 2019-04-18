@@ -1,4 +1,13 @@
 <?php
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	Description		:	Hostinger Free SSL auto-installer															//
+//	Author			:	Puvox Software (contact@puvox.software)	 													//
+//	URL				:	https://puvox.software/blog/hostinger-free-sll-auto-install/								//
+//	License			: 	Apache																						//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 header("Cache-Control: max-age=0, must-revalidate");
 //ini_set('session.cache_limiter','public');
 session_cache_limiter(true);
@@ -122,9 +131,11 @@ if ( !empty($_GET['generate']))
 
 		$ssh= cron_exec($ip, $port, $username, $ssh_key);
 
+		// Note, if "https://getcomposer.org/installer" url is blocked on your server, use "https://hostingerssl.puvox.software/composer/installer"
 		$command =  
-		'site='.$domain.';    sites_all='. $domain . $www . $extras .';     myemail="'.$user_mail.'";              TargetFolder=acme-client;     ( [ -d "$TargetFolder" ] || git clone https://github.com/kelunik/acme-client )  &&    cd $TargetFolder     &&    ( [ -f "composer-setup.php" ]    ||    php -r "copy(\'https://itask.software/tools/hostinger-ssl-autoinstaller/composer/installer\', \'composer-setup.php\');" )        &&       ( [ -f "composer.phar" ]  || ( php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');" ) )   &&   ( [ -d "vendor" ] ||  php composer.phar install --no-dev )      &&   php bin/acme setup --server letsencrypt --email $myemail           &&   php bin/acme issue --domains $sites_all --path '.$domain_root . $www_root . $extras_root.' --server letsencrypt      &&    php -r "mail(\''.$user_mail.'\', \'SSL generated for : '.$domain.'\',  file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/cert.pem\') .PHP_EOL.PHP_EOL . file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/key.pem\') );"';
+		'site='.$domain.';    sites_all='. $domain . $www . $extras .';     myemail="'.$user_mail.'";              TargetFolder=acme-client;     ( [ -d "$TargetFolder" ] || git clone https://github.com/kelunik/acme-client )  &&    cd $TargetFolder     &&    ( [ -f "composer-setup.php" ]    ||    php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');" )        &&       ( [ -f "composer.phar" ]  || ( php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');" ) )   &&   ( [ -d "vendor" ] ||  php composer.phar install --no-dev )      &&   php bin/acme setup --server letsencrypt --email $myemail           &&   php bin/acme issue --domains $sites_all --path '.$domain_root . $www_root . $extras_root.' --server letsencrypt      &&    php -r "mail(\''.$user_mail.'\', \'SSL generated for : '.$domain.'\',  file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/cert.pem\') .PHP_EOL.PHP_EOL . file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/key.pem\') );"';
 
+		
 		$res= $ssh->exec($command);
 		echo  $res  ; 
 		if (stripos($res, 'Successfully issued') !==false )  {
@@ -184,7 +195,7 @@ if ( !empty($_GET['generate']))
 		<h1> Setup <b>HTTPS</b> for your site with <code>Let's encrypt</code> free SLL</h1>
 		
 		<div class="text-center text-italic">
-			(Fork on<a href="https://github.com/Puvox/free-SSL-generator-hostinger" target="_blank"> GitHub  <img src="https://assets-cdn.github.com/images/icons/emoji/octocat.png" height="30" /></a> and setup on your site)
+			(Fork on<a href="https://github.com/Puvox/free-SSL-generator-hostinger" target="_blank"> GitHub  <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" height="30" /></a> and setup on your site)
 		</div>
 
 	</div>
@@ -244,4 +255,3 @@ if ( !empty($_GET['generate']))
 </div>
 </body>
 </html>
-
