@@ -137,7 +137,7 @@ if ( !empty($_GET['generate']))
 
 		
 		$res= $ssh->exec($command);
-		echo  $res  ; 
+		echo  nl2br($res); 
 		if (stripos($res, 'Successfully issued') !==false )  {
 			echo '<div style="background:green;"><br/><br/>Files were successfully issued, check your mail.</div>';
 		}
