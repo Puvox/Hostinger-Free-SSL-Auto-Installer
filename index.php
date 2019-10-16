@@ -50,71 +50,72 @@ function cron_exec($server, $port, $user, $key_or_pass )
 
 // =============================================== //
 
-
-if(!empty($_FILES) && !empty($_FILES['fileToUpload']) )
+function main()
 {
-	ini_set('post_max_size', '100K');
-	ini_set('upload_max_filesize', '100K');
+	if(!empty($_FILES) && !empty($_FILES['fileToUpload']) )
+	{
+		ini_set('post_max_size', '100K');
+		ini_set('upload_max_filesize', '100K');
 
-	//include_once($file);
-	$tmp_file=$_FILES['fileToUpload']['tmp_name']; 
-	//$myXMLData = file_get_contents($tmp_file);
-	//$xml=simplexml_load_string($myXMLData) or die("Error: Cannot create object");
-	$xml=simplexml_load_file($tmp_file) or die("Error: Cannot read XML file");
+		//include_once($file);
+		$tmp_file=$_FILES['fileToUpload']['tmp_name']; 
+		//$myXMLData = file_get_contents($tmp_file);
+		//$xml=simplexml_load_string($myXMLData) or die("Error: Cannot create object");
+		$xml=simplexml_load_file($tmp_file) or die("Error: Cannot read XML file");
 
-	$array = [];
-	$array['port']		= 65002; 
-	$array['user_mail']	= (string) $xml->send_ssl_to[0]; 
-	$array['ssh_key']	= (string) $xml->ssh_key[0]; 
-	$array['domains']	= (array) $xml->domain;
+		$array = [];
+		$array['port']		= 65002; 
+		$array['user_mail']	= (string) $xml->send_ssl_to[0]; 
+		$array['ssh_key']	= (string) $xml->ssh_key[0]; 
+		$array['domains']	= (array) $xml->domain;
 
-	session_start();
-	$_SESSION['xmldata'] = $array;
-	session_write_close();
+		session_start();
+		$_SESSION['xmldata'] = $array;
+		session_write_close();
 
-	echo '<div class="all">';
-	echo 'Click desired domain to generate SSL for it: <br/>';
+		echo '<div class="all">';
+		echo 'Click desired domain to generate SSL for it: <br/>';
 
-	foreach($array['domains'] as $e){
-		$domain_data = explode("|",$e);
-		$domain		= $domain_data[0];
-		?>
-			<div class="">
-				<a href="?generate=<?php echo $domain;?>" target="_blank"><?php echo $domain;?></div>
-			</div>
-		<?php
+		foreach($array['domains'] as $e){
+			$domain_data = explode("|",$e);
+			$domain		= $domain_data[0];
+			?>
+				<div class="">
+					<a href="?generate=<?php echo $domain;?>" target="_blank"><?php echo $domain;?></div>
+				</div>
+			<?php
+		}
+		echo '</div>';
+		exit;
 	}
-	echo '</div>';
-	exit;
 }
 
+main(); 
 
-
-if ( !empty($_GET['generate']))
+function checkGenerator()
 {
-	session_start();
-		
 	$port		= (string) $_SESSION['xmldata']['port']; 
 	$user_mail	= (string) $_SESSION['xmldata']['user_mail']; 
 	$ssh_key	= (string) $_SESSION['xmldata']['ssh_key']; 
-	$domains	= (array)  $_SESSION['xmldata']['domains'];  
+	$domains	= (array)  $_SESSION['xmldata']['domains']; 
 
+	$all_domains = $domains;
 
 	$which_site = $_GET['generate'];
-	foreach($domains as $e)
+	foreach($all_domains as $e)
 	{
 		$domain_data = explode("|",$e);
 		$domain		= $domain_data[0];
 		$ip			= $domain_data[1];
 		$username	= $domain_data[2];
-		
 		if ($which_site != $domain) 
 			continue;
+		$is_subdomain =  substr_count($domain, '.')>1;
 
 		echo '<h1>'.$domain .'</h1>';
 
 		// removed  from in front of ".... php composer.phar " , because hosting is blocking that domain. So, we have to manually include the "composer.phar"
-		//   php -r "copy(\'https://itask.software/tools2/composer-installer.txt\', \'composer-setup.php\');" && php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');"  && 
+		//   php -r "copy(\'https://puvox.software/tools2/composer-installer.txt\', \'composer-setup.php\');" && php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');"  && 
 		$www		= substr_count($domain , '.') >1 ? '' : ':www.'.$domain ;
 		$www_root	= substr_count($domain , '.') >1 ? '' : '../public_html';
 		
@@ -128,28 +129,48 @@ if ( !empty($_GET['generate']))
 		}
 		
 		$domain_root = '../public_html/';
-
 		$ssh= cron_exec($ip, $port, $username, $ssh_key);
 
 		// Note, if "https://getcomposer.org/installer" url is blocked on your server, use "https://hostingerssl.puvox.software/composer/installer"
-		$command =  
-		'site='.$domain.';    sites_all='. $domain . $www . $extras .';     myemail="'.$user_mail.'";              TargetFolder=acme-client;     ( [ -d "$TargetFolder" ] || git clone https://github.com/kelunik/acme-client )  &&    cd $TargetFolder     &&    ( [ -f "composer-setup.php" ]    ||    php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');" )        &&       ( [ -f "composer.phar" ]  || ( php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');" ) )   &&   ( [ -d "vendor" ] ||  php composer.phar install --no-dev )      &&   php bin/acme setup --server letsencrypt --email $myemail           &&   php bin/acme issue --domains $sites_all --path '.$domain_root . $www_root . $extras_root.' --server letsencrypt      &&    php -r "mail(\''.$user_mail.'\', \'SSL generated for : '.$domain.'\',  file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/cert.pem\') .PHP_EOL.PHP_EOL . file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/key.pem\') );"';
+		$COMMAND_issue_cert =  
+		'site='.$domain.';    sites_all='. $domain . $www . $extras .';     myemail="'.$user_mail.'";              TargetFolder=acme-client;     ( [ -d "$TargetFolder" ] || git clone https://github.com/kelunik/acme-client )  &&    cd $TargetFolder     &&    ( [ -f "composer-setup.php" ]    ||    php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');" )        &&       ( [ -f "composer.phar" ]  || ( php composer-setup.php &&  php -r "unlink(\'composer-setup.php\');" ) )   &&   ( [ -d "vendor" ] ||  php composer.phar install --no-dev )      &&   php bin/acme setup --server letsencrypt --email $myemail           &&   php bin/acme issue --domains $sites_all --path '.$domain_root . $www_root . $extras_root.' --server letsencrypt      &&    php -r "mail(\''.$user_mail.'\', \'SSL files for : '.$domain.'\',  file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/cert.pem\') .PHP_EOL.PHP_EOL . file_get_contents(\'./data/certs/acme-v01.api.letsencrypt.org.directory/$site/key.pem\') );"';
+
+		$res= $ssh->exec($COMMAND_issue_cert);
 
 		
-		$res= $ssh->exec($command);
-		echo  nl2br($res); 
+		// if glitchy problem, happens on some subdomains
+		$errorTxt = 'Verification failed, please check the response body for';
+		if (stripos($res,$errorTxt ) !==false && $is_subdomain)  {
+			echo '<div style="background:red;"><br/><br/>had problem on first try for this subdomain. Re-try with manual creation.</div>';
+			preg_match("/$errorTxt(.*?)acme\-challenge\/(.*?)\'/", $res, $vars);
+			$filename = $vars[2];
+			preg_match("/but \'(.*?)\' was expected/", $res, $vars2);
+			$content = $vars2[1];
+			$cmd  =		'echo "'.$content.'" > /home/'.$username.'/domains/'.$domain.	 '/public_html/.well-known/acme-challenge/'.$filename;
+			$res= $ssh->exec($cmd);
+			preg_match('/(.*?)\./', $domain, $n); 
+			$subdomain_slug = $n[1];
+			$real_domain = str_replace($n[0],'', $domain);
+			$cmd  ='echo "'.$content.'" > /home/'.$username.'/domains/'.$real_domain.'/public_html/'.$subdomain_slug.'/.well-known/acme-challenge/'.$filename;
+			$res= $ssh->exec($cmd);
+			// bin/acme issue ......   --rekey false ??
+			$res= $ssh->exec($COMMAND_issue_cert);
+			echo  nl2br($res); 
+		}
+
 		if (stripos($res, 'Successfully issued') !==false )  {
 			echo '<div style="background:green;"><br/><br/>Files were successfully issued, check your mail.</div>';
 		}
 		echo '<br/>';
 	}
-	exit;
 }
 
-
-
-
-
+if ( !empty($_GET['generate']))
+{
+	session_start();
+	checkGenerator();
+	exit;
+}
 
 
 ?><!doctype html>
