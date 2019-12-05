@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Free SSL auto-installer for Hostinger</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/css/bootstrap.min.css" />
+
+	<style>
+	body { font-family: sans-serif;  background-color: #eeeeee;}
+	red { color:red; }
+	code { color:black; }
+	.container { max-width: 100%; }
+	.warning { color:red; font-weight:bold; }
+	.warning2 { color:pink; font-style:italic; background:black; font-size: 16px; padding:3px; }
+	#page {margin: 50px; }
+	zz#page .heading{text-align:center;} 
+	</style>
+
+	<!-- <script src="./assets/script-public.js?<?php echo "rand_".rand(1,22222222222);?>"></script> -->
+
+</head>
+<body class="">
+
+<div id="page" class="container">
+
+
+<div class="index">
+	<div class="heading">
+		<h1> Setup <b>HTTPS</b> for your site with <code>Let's encrypt</code> free SLL</h1>
+		
+		<div class="text-italic">
+		<b style="color:red;">NOTE: This script automatically emails you the generated CERTIFICATE and PRIVATE KEY (Remember to check spambox, sometimes it gets there). After that, Apply the keys to your hosting SSL page.</b> 
+			<h2>STEPS:</h2>
+			1) Download the <a href="https://github.com/Puvox/free-SSL-generator-hostinger" target="_blank"><code>.zip</code> from GitHub <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" height="30" /></a>, unpack and upload the contents of the folder in PARENT DIRECTORY of <code>public_html</code>.
+			<br/>2) Edit <code>cron.php</code> file and set your email & correct paths.
+			<br/>3) Setup a cron job to run once in 1 minute (after first successful run, then QUICKLY change that to once in a 2 month, otherwise it will make many requests with 429 error), type the below code (just change to your credentials):
+			<div>
+			<code>/usr/bin/php <red>/home/uXXXXXXXXXXX/domains/yoursite.com/</red>cron.php basename=<red>yoursite.com</red>&domains[]=<red>yoursite.com</red>&domains[]=<red>www.yoursite.com</red></code>
+			</div> <i>(Note: Remove <code>www</code> subdomain from parameters if you don't have that subdomain accessible.)</i>
+		</div>
+
+	</div>
+	
+  </div>
+</div>
+
+
+</div>
+</body>
+</html>
