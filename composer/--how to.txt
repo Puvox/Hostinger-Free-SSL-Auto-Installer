@@ -1,6 +1,0 @@
-        $this->baseUrl = $uriScheme.'://itask.software/tools/hostinger-ssl-autoinstaller/composer/';	//getcomposer.org  is blocked from this SSH SERVER
-
-https://getcomposer.org/download/1.7.2/composer.phar
-
-
-} elseif (!$this->verifySignature($version, $signature, $this->tmpFile) && false)
