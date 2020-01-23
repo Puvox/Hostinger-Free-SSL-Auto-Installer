@@ -1,21 +1,12 @@
 <?php
-$email = 'yourmail@gmail.com';				// your mail where you will get certificates
-$domain = 'yourdomain.com';					// your domain name, on which you are creating SSL's
-$path_to_public_html = __DIR__.'/../';		// path your domain public root
 
-
-// =================================== you dont belong to below ==========================================//
-$domains = [$domain , 'www.'.$domain];
-$path_to_lescript_library = __DIR__.'/lescript-master/Lescript.php';
-$cert_storate_path = __DIR__ .'/certificate/storage';
-$path_to_keys = $cert_storate_path."/$domain";
+// ###################### core ########################
 if(!defined("PHP_VERSION_ID") || PHP_VERSION_ID < 50300 || !extension_loaded('openssl') || !extension_loaded('curl')) {
     die("You need at least PHP 5.3.0 with OpenSSL and curl extension\n");
 }
-require $path_to_lescript_library;
+require ($path_to_lescript_library = __DIR__.'/lescript-master/Lescript.php');
 
-// you can use any logger according to Psr\Log\LoggerInterface
-class Logger { function __call($name, $arguments) { echo (date('Y-m-d H:i:s')." [$name] ${arguments[0]}\n<br/>"); }}
+class Logger { function __call($name, $arguments) { echo (date('Y-m-d H:i:s')." [$name] ${arguments[0]}\n<br/>"); }}  // you can use any logger according to Psr\Log\LoggerInterface
 $logger = new Logger();
 
 function rmdir_recursive($path){
@@ -26,23 +17,45 @@ function rmdir_recursive($path){
 		return true;
 	}
 	return true;
-	//include_once(ABSPATH.'/wp-admin/includes/class-wp-filesystem-base.php');
-	//\WP_Filesystem_Base::rmdir($fullPath, true);
 }
 
 
-try {
 
+
+
+
+// ###################### custom ########################
+try {
+	if (empty($argv)) 
+	{
+		exit('$argv is empty');
+	}
+	else{
+		if (isset($argv[1])) parse_str($argv[1], $array); 
+		$domain	=$array['domain'];
+		$email	=$array['email'];
+		$path_to_html =$array['path_to_html'];
+	}
+
+	$domains = [$domain , 'www.'.$domain];
+	$path_to_public_html = __DIR__.'/'.$path_to_html;	
+	$cert_storate_path = __DIR__ .'/certificate/storage';
+	$path_to_keys = $cert_storate_path."/$domain";
+
+	// ###############################################
     $le = new Analogic\ACME\Lescript($cert_storate_path, $path_to_public_html, $logger);
     # or without $logger
     $le->contact = array('mailto:test@test.com'); // optional
     $le->initAccount();
     $le->signDomains($domains);
+
 	mail($email, 'SSL files for : '.$domain,  file_get_contents($path_to_keys. '/cert.pem'). PHP_EOL . PHP_EOL . file_get_contents($path_to_keys. '/private.pem'), $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
-	echo '<span style="font-size:2em; color:green;>SUCCESSFULLY MAILED (check your spambox)</span>';
+	echo '<span style="font-size:2em; color:green;>KEYS SUCCESSFULLY MAILED (check your spambox)</span>'; 
 } catch (\Exception $e) {
-    $logger->error($e->getMessage());
+    $logger->error($message = $e->getMessage());
     $logger->error($e->getTraceAsString());
+	mail($email, 'SSL files couldnt be created. Reason:'. $message , $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
+	echo '<span style="font-size:2em; color:green;>KEYS WERE NOT CREATED. $message</span>'; 
 }
 finally{
 	// remove traces after processing
