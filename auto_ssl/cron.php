@@ -44,8 +44,8 @@ try {
 	echo '<span style="font-size:2em; color:green;>KEYS SUCCESSFULLY MAILED (check your spambox)</span>'; 
 } catch (\Exception $e) {
     $logger->error($message = $e->getMessage());
-    $logger->error($e->getTraceAsString());
-	mail($email, 'SSL files couldnt be created. Reason:'. $message , $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
+    //$logger->error($e->getTraceAsString());  reveals server paths too...
+	mail($email, 'SSL files couldnt be created.',  "Reason:".$message , $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
 	echo '<span style="font-size:2em; color:green;>KEYS WERE NOT CREATED. $message</span>'; 
 }
 finally{
