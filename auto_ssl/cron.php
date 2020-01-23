@@ -1,4 +1,6 @@
 <?php
+$email	='example@gmail.com';
+
 
 // ###################### core ########################
 if(!defined("PHP_VERSION_ID") || PHP_VERSION_ID < 50300 || !extension_loaded('openssl') || !extension_loaded('curl')) {
@@ -20,25 +22,14 @@ function rmdir_recursive($path){
 }
 
 
-
-
-
+ 
 
 // ###################### custom ########################
-try {
-	if (empty($argv)) 
-	{
-		exit('$argv is empty');
-	}
-	else{
-		if (isset($argv[1])) parse_str($argv[1], $array); 
-		$domain	=$array['domain'];
-		$email	=$array['email'];
-		$path_to_html =$array['path_to_html'];
-	}
-
-	$domains = [$domain , 'www.'.$domain];
-	$path_to_public_html = __DIR__.'/'.$path_to_html;	
+try { 
+	//if (isset($argv[1])) parse_str($argv[1], $array);
+	$domain	=str_replace('www.', '', $_SERVER['HTTP_HOST']);
+	$domains = [$domain, 'www.'.$domain];
+	$path_to_public_html = $_SERVER["DOCUMENT_ROOT"];	
 	$cert_storate_path = __DIR__ .'/certificate/storage';
 	$path_to_keys = $cert_storate_path."/$domain";
 
