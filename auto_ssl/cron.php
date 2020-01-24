@@ -39,9 +39,9 @@ try {
     $le->contact = array('mailto:test@test.com'); // optional
     $le->initAccount();
     $le->signDomains($domains);
-	
+
 	// needed: fullchain.pem (contains joint of "cert.pem & chain.pem") + private.pem is needed
-	mail($email, 'SSL files for : '.$domain,  file_get_contents($path_to_keys. '/fullchain.pem'). PHP_EOL . PHP_EOL . file_get_contents($path_to_keys. '/private.pem'), $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
+	mail($email, 'SSL files for : '.$domain,  "Certificate Full Chain:". PHP_EOL . PHP_EOL . file_get_contents($path_to_keys. '/fullchain.pem'). PHP_EOL . PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .PHP_EOL .	"Private Key:". PHP_EOL . PHP_EOL . PHP_EOL . file_get_contents($path_to_keys. '/private.pem'), $headers ='From: ssl_issued@'.$domain . "\r\n" .  'Reply-To: ssl_issued@'.$domain . "\r\n" .  'X-Mailer: PHP/' . phpversion() );
 	echo '<span style="font-size:2em; color:green;>KEYS SUCCESSFULLY MAILED (check your spambox)</span>'; 
 } catch (\Exception $e) {
     $logger->error($message = $e->getMessage());
