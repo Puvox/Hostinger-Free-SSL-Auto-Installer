@@ -36,7 +36,7 @@ try {
 	// ###############################################
     $le = new Analogic\ACME\Lescript($cert_storate_path, $path_to_public_html, $logger);
     # or without $logger
-    $le->contact = array('mailto:test@test.com'); // optional
+    $le->contact = ["mailto:$email"]; // optional
     $le->initAccount();
     $le->signDomains($domains);
 
