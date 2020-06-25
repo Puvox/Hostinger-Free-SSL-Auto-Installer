@@ -26,6 +26,16 @@ function rmdir_recursive($path){
 
 // ###################### custom ########################
 try { 
+	//#### check if 85 days passed ####
+	$file= __DIR__.'/tmp_last_time';
+	$period = 85*86400;
+	if (!file_exists($file)) file_put_contents($file, 0 );
+	$last_time = file_get_contents($file);
+	if ( time() - $period  < $last_time ) 
+		return;
+	// ################################
+
+
 	//if (isset($argv[1])) parse_str($argv[1], $array);
 	$domain	=str_replace('www.', '', $_SERVER['HTTP_HOST']);
 	$domains = [$domain, 'www.'.$domain];
