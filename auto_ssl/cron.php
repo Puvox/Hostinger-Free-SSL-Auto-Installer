@@ -1,5 +1,5 @@
 <?php
-$email	='example@gmail.com';
+$email	='your_email@gmail.com';
 
 
 // ###################### core ########################
