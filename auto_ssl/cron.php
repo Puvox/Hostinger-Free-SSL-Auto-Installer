@@ -33,6 +33,8 @@ try {
 	$last_time = file_get_contents($file);
 	if ( time() - $period  < $last_time ) 
 		return;
+	else
+		 file_put_contents($file, time() );
 	// ################################
 
 
