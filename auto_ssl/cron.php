@@ -32,9 +32,9 @@ try {
 	if (!file_exists($file)) file_put_contents($file, 0 );
 	$last_time = file_get_contents($file);
 	if ( time() - $period  < $last_time ) 
-		return;
+		exit("too early");
 	else
-		 file_put_contents($file, time() );
+		file_put_contents($file, time() );
 	// ################################
 
 
