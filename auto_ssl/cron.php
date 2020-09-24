@@ -31,7 +31,7 @@ try {
 	$period = 85*86400;
 	if (!file_exists($file)) file_put_contents($file, 0 );
 	$last_time = file_get_contents($file);
-	if ( time() - $period  < $last_time ) 
+	if ( time() - $period  < $last_time && !(isset($_GET['force'])) 
 		exit("too early");
 	else
 		file_put_contents($file, time() );
