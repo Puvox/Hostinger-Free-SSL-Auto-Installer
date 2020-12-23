@@ -1,5 +1,5 @@
 <?php
-$email	='your_email@gmail.com';
+$email	='your_email@gmail.com';	// check your spam folder
 
 
 
